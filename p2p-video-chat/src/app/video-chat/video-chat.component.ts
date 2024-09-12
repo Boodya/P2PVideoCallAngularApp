@@ -11,6 +11,7 @@ export class VideoChatComponent implements OnInit {
   private peer: Peer;
   private localStream: MediaStream;
   private currentCall: any;
+  private roomId: string = '';
 
   constructor() {
     this.peer = new Peer();
@@ -18,18 +19,22 @@ export class VideoChatComponent implements OnInit {
   }
 
   ngOnInit() {
-    
     this.setupPeer();
     this.setupMedia();
   }
 
-  setupPeer() {
-    
+  copyLinkToClipboard() {
+    const url = `${window.location.origin}?roomId=${this.roomId}`;
+    navigator.clipboard.writeText(url);
+    console.log("link copied");
+  }
 
+  setupPeer() {
     // Display the local peer ID to share with the other peer
     this.peer.on('open', (id: string) => {
-      const myRoomIdInput = document.getElementById('myRoomId') as HTMLInputElement;
-      myRoomIdInput.value = id;
+      this.roomId = id;
+      const myRoomIdInput = document.getElementById('myRoomId') as HTMLLabelElement;
+      myRoomIdInput.textContent = "My ID: " + id;
     });
 
     // Handle incoming calls
@@ -55,19 +60,36 @@ export class VideoChatComponent implements OnInit {
         this.localStream = stream;
         const localVideo = document.getElementById('localVideo') as HTMLVideoElement;
         localVideo.srcObject = this.localStream;
+        setTimeout(() => {
+          this.callPeer();
+        }, 1000);
+
       })
       .catch((error: any) => {
         console.error('Error accessing media devices.', error);
       });
   }
 
-  callPeer() {
-    const remotePeerIdInput = document.getElementById('remoteId') as HTMLInputElement;
-    const remotePeerId = remotePeerIdInput.value;
+  getRemoteId() {
+    const urlParams = new URLSearchParams(window.location.search);
+    let roomId = urlParams.get('roomId');
+    if (roomId == null) {
+      const remotePeerIdInput = document.getElementById('remoteId') as HTMLInputElement;
+      roomId = remotePeerIdInput.value;
+    }
+    return roomId;
+  }
 
+  closeCall() {
     if (this.currentCall) {
       this.currentCall.close();
     }
+  }
+
+  callPeer() {
+    const remotePeerId = this.getRemoteId();
+    if (remotePeerId == null || remotePeerId == '')
+      return;
 
     const call = this.peer.call(remotePeerId, this.localStream);
 

@@ -1,0 +1,14 @@
+<div class="container">
+    <h2>P2P Чат</h2>
+    <div>
+        <label for="myRoomId">Мой номер: </label>
+        <input id="myRoomId" type="text" placeholder=""><br/>
+        <label for="remoteId">Номер для подключения: </label>
+        <input id="remoteId" type="text" placeholder="Room ID">
+        <button (click)="callPeer()">Присоединиться</button>
+    </div>
+    <div>
+        <video id="localVideo" autoplay muted></video>
+        <video id="remoteVideo" autoplay></video>
+    </div>
+</div>

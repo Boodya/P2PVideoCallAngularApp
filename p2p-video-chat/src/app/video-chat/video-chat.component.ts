@@ -24,7 +24,7 @@ export class VideoChatComponent implements OnInit {
   }
 
   copyLinkToClipboard() {
-    const url = `${window.location.origin}?roomId=${this.roomId}`;
+    const url = `${window.location.href}?roomId=${this.roomId}`;
     navigator.clipboard.writeText(url);
     console.log("link copied");
   }

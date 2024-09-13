@@ -1,14 +1,18 @@
 .video-container {
     position: relative;
-    width: 81vw;
-    height: 81vh;
+    width: 100%;
+    height: auto;
     max-width: 1000px;
+    margin: 0 auto;
+    border-radius: 8px;
     overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 #remoteVideo {
     width: 100%;
     height: 100%;
+    max-width: 550px;
     object-fit: cover;
 }
 
@@ -21,4 +25,20 @@
     border: 2px solid white;
     border-radius: 8px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    z-index: 1; /* Приводим локальное видео на передний план */
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    #localVideo {
+        width: 150px;
+        height: 100px;
+        bottom: 10px;
+        right: 10px;
+    }
+
+    .video-container {
+        width: 100%; /* Убедимся, что контейнер занимает всю ширину на маленьких экранах */
+        height: auto;
+    }
 }

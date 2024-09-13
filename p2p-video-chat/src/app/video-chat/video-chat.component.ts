@@ -1,5 +1,6 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Peer } from 'peerjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-video-chat',
@@ -13,6 +14,8 @@ export class VideoChatComponent implements OnInit {
   private localStream: MediaStream | undefined;
   private currentCall: any;
   private roomId: string = '';
+
+  constructor(private router: Router) {}
 
   ngOnInit() {
     this.setupPeer();
@@ -31,7 +34,7 @@ export class VideoChatComponent implements OnInit {
     this.peer.on('open', (id: string) => {
       this.roomId = id;
       const myRoomIdInput = document.getElementById('myRoomId') as HTMLLabelElement;
-      myRoomIdInput.textContent = "My ID: " + id;
+      myRoomIdInput.textContent = id;
     });
 
     // Handle incoming calls
@@ -75,18 +78,14 @@ export class VideoChatComponent implements OnInit {
 
   getRemoteId() {
     const urlParams = new URLSearchParams(window.location.search);
-    let roomId = urlParams.get('roomId');
-    if (roomId == null) {
-      const remotePeerIdInput = document.getElementById('remoteId') as HTMLInputElement;
-      roomId = remotePeerIdInput.value;
-    }
-    return roomId;
+    return urlParams.get('roomId');
   }
 
   closeCall() {
     if (this.currentCall) {
       this.currentCall.close();
     }
+    this.router.navigate(['']);
   }
 
   callPeer() {

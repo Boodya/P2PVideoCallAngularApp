@@ -22,7 +22,7 @@ export class HomeComponent {
   joinChat() {
     const roomId = document.getElementById("roomId") as HTMLInputElement;
     if (roomId.value) {
-      this.router.navigate(['/chat', roomId.value]);
+      this.router.navigate(['/chat'], { queryParams: { roomId: roomId.value } });
     } else {
       roomId.classList.add('invalid');
     }

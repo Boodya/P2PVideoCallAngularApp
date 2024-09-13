@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { ThemeService } from '../services/theme.service';
 
 @Component({
   selector: 'app-home',
@@ -9,10 +10,9 @@ import { Router } from '@angular/router';
 })
 export class HomeComponent {
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private themeService: ThemeService) {}
 
   ngOnInit() {
-    this.triggerDarkMode(this.isDarkModeEnabled());
   }
 
   createChat() {
@@ -28,21 +28,12 @@ export class HomeComponent {
     }
   }
 
-  isDarkModeEnabled() {
-    return localStorage.getItem('darkMode') === 'enabled';
-  }
-
   toggleDarkMode(event: any){
-    this.triggerDarkMode(event.target.checked);
+    const isChecked = event.target.checked;
+    this.themeService.toggleDarkMode(isChecked);
   }
 
-  triggerDarkMode(isChecked: boolean) {
-    if (isChecked) {
-      document.body.classList.add('dark-mode');
-      localStorage.setItem('darkMode', 'enabled');
-    } else {
-      document.body.classList.remove('dark-mode');
-      localStorage.setItem('darkMode', 'disabled');
-    }
+  isDarkModeEnabled(){
+    return this.themeService.isDarkModeEnabled();
   }
 }

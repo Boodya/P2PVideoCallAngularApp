@@ -9,17 +9,17 @@
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-#remoteVideo {
+.primaryVideo {
     width: 100%;
     height: 100%;
     max-width: 550px;
     object-fit: cover;
 }
 
-#localVideo {
+.secondaryVideo {
     position: absolute;
-    width: 200px;
-    height: 150px;
+    width: 150px;
+    height: 114px;
     bottom: 20px;
     right: 20px;
     border: 2px solid white;

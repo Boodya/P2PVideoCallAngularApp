@@ -1,13 +1,14 @@
 <div class="container">
     <h2>Добро пожаловать в P2P Чат</h2>
-    <label class="switch">
-        <input type="checkbox" (change)="toggleDarkMode($event)" [checked]="isDarkModeEnabled()">
-        <span class="slider"></span>
-    </label>
-    <p>Тёмный режим</p>
     <div>
         <input type="text" id="roomId" placeholder="Введите ID чата">
         <button (click)="joinChat()">Присоединиться к чату</button>
         <button (click)="createChat()">Создать чат</button>
     </div>
+    <br/><br/>
+    <label class="switch">
+        <input type="checkbox" (change)="toggleDarkMode($event)" [checked]="isDarkModeEnabled()">
+        <span class="slider"></span>
+    </label>
+    <p>Тёмный режим</p>
 </div>

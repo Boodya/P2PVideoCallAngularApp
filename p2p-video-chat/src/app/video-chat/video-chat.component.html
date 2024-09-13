@@ -5,7 +5,7 @@
         <button (click)="closeCall()">Закончить звонок</button>
     </div>
     <div class="video-container">
-        <video id="remoteVideo" autoplay></video>
-        <video id="localVideo" autoplay playsinline></video>
+        <video id="remoteVideo" class="primaryVideo" (click)="swapVideo('remote')" autoplay></video>
+        <video id="localVideo" class="secondaryVideo" (click)="swapVideo('local')" autoplay playsinline></video>
     </div>
 </div>

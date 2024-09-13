@@ -1,6 +1,8 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Peer } from 'peerjs';
 import { Router } from '@angular/router';
+import { ThemeService } from '../services/theme.service';
+import { PeerValidationService } from '../services/peervalidation.service';
 
 @Component({
   selector: 'app-video-chat',
@@ -15,17 +17,13 @@ export class VideoChatComponent implements OnInit {
   private currentCall: any;
   private roomId: string = '';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router,
+    private themeService: ThemeService,
+    private peerValidationService: PeerValidationService) { }
 
   ngOnInit() {
     this.setupPeer();
     this.setupMedia();
-  }
-
-  copyLinkToClipboard() {
-    const url = `${window.location.href}?roomId=${this.roomId}`;
-    navigator.clipboard.writeText(url);
-    console.log("link copied");
   }
 
   setupPeer() {
@@ -76,6 +74,12 @@ export class VideoChatComponent implements OnInit {
       });
   }
 
+  copyLinkToClipboard() {
+    const url = `${window.location.href}?roomId=${this.roomId}`;
+    navigator.clipboard.writeText(url);
+    console.log("link copied");
+  }
+
   getRemoteId() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('roomId');
@@ -92,13 +96,20 @@ export class VideoChatComponent implements OnInit {
     const remotePeerId = this.getRemoteId();
     if (remotePeerId == null || remotePeerId == '')
       return;
-    if(this.peer == undefined || this.localStream == undefined)
+    if (this.peer == undefined || this.localStream == undefined)
       return;
 
     const call = this.peer.call(remotePeerId, this.localStream);
+    
+    const streamTimeout = setTimeout(() => {
+      console.error('Room not found.');
+      alert('Комната не найдена. Использован неправильный идентификатор!');
+      this.router.navigate(['/']);
+    }, 5000);
 
     call.on('stream', (remoteStream: MediaStream) => {
       console.log("Connection established");
+      clearTimeout(streamTimeout);
       const remoteVideo = document.getElementById('remoteVideo') as HTMLVideoElement;
       remoteVideo.srcObject = remoteStream;
     });
@@ -107,6 +118,30 @@ export class VideoChatComponent implements OnInit {
       console.log("Call ended.");
     });
 
+    call.on('error', (err: any) => {
+      console.error('No peer found for this Room ID:', err);
+      alert('Stream with this Room ID does not exist.');
+    });
+
     this.currentCall = call;
   }
+
+  swapVideo(type: string) {
+    const localVideo = document.getElementById('localVideo') as HTMLVideoElement;
+    const remoteVideo = document.getElementById('remoteVideo') as HTMLVideoElement;
+  
+    if (type === 'local') {
+      localVideo.classList.remove('secondaryVideo');
+      localVideo.classList.add('primaryVideo');
+  
+      remoteVideo.classList.remove('primaryVideo');
+      remoteVideo.classList.add('secondaryVideo');
+    } else if (type === 'remote') {
+      remoteVideo.classList.remove('secondaryVideo');
+      remoteVideo.classList.add('primaryVideo');
+  
+      localVideo.classList.remove('primaryVideo');
+      localVideo.classList.add('secondaryVideo');
+    }
+  }  
 }

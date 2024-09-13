@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { Peer } from 'peerjs';
 
 @Component({
@@ -8,15 +8,11 @@ import { Peer } from 'peerjs';
   styleUrls: ['./video-chat.component.css']
 })
 export class VideoChatComponent implements OnInit {
-  private peer: Peer;
-  private localStream: MediaStream;
+  @ViewChild('localVideo') localVideo!: ElementRef;
+  private peer: Peer | undefined;
+  private localStream: MediaStream | undefined;
   private currentCall: any;
   private roomId: string = '';
-
-  constructor() {
-    this.peer = new Peer();
-    this.localStream = new MediaStream();
-  }
 
   ngOnInit() {
     this.setupPeer();
@@ -30,6 +26,7 @@ export class VideoChatComponent implements OnInit {
   }
 
   setupPeer() {
+    this.peer = new Peer();
     // Display the local peer ID to share with the other peer
     this.peer.on('open', (id: string) => {
       this.roomId = id;
@@ -55,11 +52,17 @@ export class VideoChatComponent implements OnInit {
   }
 
   setupMedia() {
+    this.localStream = new MediaStream();
     navigator.mediaDevices.getUserMedia({ video: true, audio: true })
       .then((stream: MediaStream) => {
         this.localStream = stream;
+        //const audioTracks = this.localStream.getAudioTracks();
+        //audioTracks.forEach(track => track.enabled = false);
         const localVideo = document.getElementById('localVideo') as HTMLVideoElement;
         localVideo.srcObject = this.localStream;
+        localVideo.volume = 0;
+        localVideo.muted = true;
+
         setTimeout(() => {
           this.callPeer();
         }, 1000);
@@ -90,10 +93,13 @@ export class VideoChatComponent implements OnInit {
     const remotePeerId = this.getRemoteId();
     if (remotePeerId == null || remotePeerId == '')
       return;
+    if(this.peer == undefined || this.localStream == undefined)
+      return;
 
     const call = this.peer.call(remotePeerId, this.localStream);
 
     call.on('stream', (remoteStream: MediaStream) => {
+      console.log("Connection established");
       const remoteVideo = document.getElementById('remoteVideo') as HTMLVideoElement;
       remoteVideo.srcObject = remoteStream;
     });

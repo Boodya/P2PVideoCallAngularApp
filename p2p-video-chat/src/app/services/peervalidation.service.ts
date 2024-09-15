@@ -5,22 +5,18 @@ import { Peer, DataConnection } from 'peerjs';
     providedIn: 'root'
 })
 export class PeerValidationService {
-    isRoomActive(roomId: string): Promise<boolean> {
+    isRoomExist(roomId: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
-            const peer = new Peer();
-            const conn: DataConnection = peer.connect(roomId);
+            const peer = new Peer(roomId);
+            peer.on('open', () => {
+                peer.destroy();
+                resolve(false);
+            });
 
-            conn.on('open', () => {
-                console.log('Peer exists, connection established');
-                conn.close();
+            peer.on('error', (err) => {
+                peer.destroy();
                 resolve(true);
             });
-
-            conn.on('error', (err) => {
-                console.error('Error connecting to peer:', err);
-                reject('Peer does not exist or is unavailable');
-            });
-            peer.destroy();
         });
     }
 }

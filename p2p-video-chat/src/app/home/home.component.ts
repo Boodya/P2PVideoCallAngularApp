@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { ThemeService } from '../services/theme.service';
+import { PeerValidationService } from '../services/peervalidation.service';
 
 @Component({
   selector: 'app-home',
@@ -9,14 +10,14 @@ import { ThemeService } from '../services/theme.service';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent {
-
-  constructor(private router: Router, private themeService: ThemeService) {}
+  private localStream: MediaStream | undefined;
+  
+  constructor(private router: Router,
+    private themeService: ThemeService,
+    private pvService: PeerValidationService) { }
 
   ngOnInit() {
-  }
-
-  createChat() {
-    this.router.navigate(['/chat']);
+    this.setupMedia();
   }
 
   joinChat() {
@@ -28,12 +29,29 @@ export class HomeComponent {
     }
   }
 
-  toggleDarkMode(event: any){
+  toggleDarkMode(event: any) {
     const isChecked = event.target.checked;
     this.themeService.toggleDarkMode(isChecked);
   }
 
-  isDarkModeEnabled(){
+  isDarkModeEnabled() {
     return this.themeService.isDarkModeEnabled();
+  }
+
+  setupMedia() {
+    this.localStream = new MediaStream();
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then((stream: MediaStream) => {
+        this.localStream = stream;
+        //const audioTracks = this.localStream.getAudioTracks();
+        //audioTracks.forEach(track => track.enabled = false);
+        const localVideo = document.getElementById('localVideo') as HTMLVideoElement;
+        localVideo.srcObject = this.localStream;
+        localVideo.volume = 0;
+        localVideo.muted = true;
+      })
+      .catch((error: any) => {
+        console.error('Error accessing media devices.', error);
+      });
   }
 }

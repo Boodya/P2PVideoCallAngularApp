@@ -3,6 +3,7 @@ import { Peer } from 'peerjs';
 import { Router } from '@angular/router';
 import { ThemeService } from '../services/theme.service';
 import { PeerValidationService } from '../services/peervalidation.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Component({
   selector: 'app-video-chat',
@@ -16,36 +17,43 @@ export class VideoChatComponent implements OnInit {
   private localStream: MediaStream | undefined;
   private currentCall: any;
   private roomId: string = '';
+  public isRemoteVideoVisible: boolean = false;
+  public isRoomAdmin: boolean = false;
 
   constructor(private router: Router,
     private themeService: ThemeService,
     private peerValidationService: PeerValidationService) { }
 
   ngOnInit() {
-    this.setupPeer();
     this.setupMedia();
+    this.setupPeer().then(() => {
+      if(!this.isRoomAdmin){
+        setTimeout(() => {
+          this.callPeer();
+        }, 500);
+      }
+    });
   }
 
-  setupPeer() {
-    this.peer = new Peer();
-    // Display the local peer ID to share with the other peer
+  async setupPeer() {
+    const peerId = await this.initializePeerId();
+    this.peer = new Peer(peerId);
     this.peer.on('open', (id: string) => {
+      console.log("Peer started with id " + id);
       this.roomId = id;
-      const myRoomIdInput = document.getElementById('myRoomId') as HTMLLabelElement;
-      myRoomIdInput.textContent = id;
     });
 
-    // Handle incoming calls
     this.peer.on('call', (call: any) => {
       call.answer(this.localStream);
-
       call.on('stream', (remoteStream: MediaStream) => {
         const remoteVideo = document.getElementById('remoteVideo') as HTMLVideoElement;
+        this.isRemoteVideoVisible = true;
         remoteVideo.srcObject = remoteStream;
       });
 
       call.on('close', () => {
         console.log("Call ended.");
+        this.isRemoteVideoVisible = false;
       });
 
       this.currentCall = call;
@@ -63,11 +71,6 @@ export class VideoChatComponent implements OnInit {
         localVideo.srcObject = this.localStream;
         localVideo.volume = 0;
         localVideo.muted = true;
-
-        setTimeout(() => {
-          this.callPeer();
-        }, 1000);
-
       })
       .catch((error: any) => {
         console.error('Error accessing media devices.', error);
@@ -75,9 +78,25 @@ export class VideoChatComponent implements OnInit {
   }
 
   copyLinkToClipboard() {
-    const url = `${window.location.href}?roomId=${this.roomId}`;
+    const fP = window.location.origin + window.location.pathname;
+    const url = `${fP}?roomId=${this.roomId}`;
     navigator.clipboard.writeText(url);
     console.log("link copied");
+  }
+
+  async initializePeerId(){
+    const remoteId = this.getRemoteId();
+    if (remoteId == null || remoteId == ''){
+      return uuidv4();
+    }
+
+    if (await this.peerValidationService.isRoomExist(remoteId)) {
+      return uuidv4();
+    } else {
+      this.isRoomAdmin = true;
+      console.log("Starting room " + remoteId);
+      return remoteId;
+    }
   }
 
   getRemoteId() {
@@ -89,6 +108,9 @@ export class VideoChatComponent implements OnInit {
     if (this.currentCall) {
       this.currentCall.close();
     }
+    if(this.peer){
+      this.peer.destroy();
+    }
     this.router.navigate(['']);
   }
 
@@ -98,11 +120,11 @@ export class VideoChatComponent implements OnInit {
       return;
     if (this.peer == undefined || this.localStream == undefined)
       return;
-
+    
     const call = this.peer.call(remotePeerId, this.localStream);
     
     const streamTimeout = setTimeout(() => {
-      console.error('Room not found.');
+      console.log('Room not found.');
       alert('Комната не найдена. Использован неправильный идентификатор!');
       this.router.navigate(['/']);
     }, 5000);
@@ -111,11 +133,13 @@ export class VideoChatComponent implements OnInit {
       console.log("Connection established");
       clearTimeout(streamTimeout);
       const remoteVideo = document.getElementById('remoteVideo') as HTMLVideoElement;
+      this.isRemoteVideoVisible = true;
       remoteVideo.srcObject = remoteStream;
     });
 
     call.on('close', () => {
-      console.log("Call ended.");
+      console.log("call closed");
+      this.isRemoteVideoVisible = false;
     });
 
     call.on('error', (err: any) => {

@@ -1,11 +1,14 @@
-<div class="container">
-    <h2 id="myRoomId"></h2>
-    <div>
-        <button (click)="copyLinkToClipboard()">Поделиться ссылкой на беседу</button>
-        <button (click)="closeCall()">Закончить звонок</button>
+<h2 id="myRoomId"></h2>
+<div>
+    <button (click)="copyLinkToClipboard()" [hidden]="!isRoomAdmin">Скопировать ссылку на комнату</button>
+    <button (click)="closeCall()">Закончить звонок</button>
+</div>
+<div class="call-area">
+    <div class="video-container">
+        <video id="remoteVideo" class="primaryVideo" [hidden]="!isRemoteVideoVisible" (click)="swapVideo('remote')"
+            autoplay playsinline></video>
     </div>
     <div class="video-container">
-        <video id="remoteVideo" class="primaryVideo" (click)="swapVideo('remote')" autoplay></video>
         <video id="localVideo" class="secondaryVideo" (click)="swapVideo('local')" autoplay playsinline></video>
     </div>
 </div>

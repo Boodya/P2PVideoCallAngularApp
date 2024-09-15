@@ -1,4 +1,3 @@
-/* Сброс стилей */
 * {
     margin: 0;
     padding: 0;
@@ -7,15 +6,13 @@
 
 html, body {
     width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    min-height: 100%;
     font-family: Arial, sans-serif;
     transition: background-color 0.3s ease;
+    margin: 0;
+    padding: 0;
 }
 
-/* Темный режим */
 body.dark-mode {
     background-color: #121212;
 }
@@ -45,8 +42,24 @@ body.dark-mode input::placeholder {
     color: #aaa;
 }
 
-/* Стандартные стили */
+.main-content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.primaryVideo,
+.secondaryVideo {
+    width: 100%;
+    max-height: 50vh;
+    object-fit: cover;
+    border: 1px solid white;
+    border-radius: 8px;
+}
+
 .container {
+    max-width: 400px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -95,7 +108,6 @@ input.invalid {
     border-width: 2px;
 }
 
-/* Переключатель тёмного режима */
 .switch {
     position: relative;
     display: inline-block;

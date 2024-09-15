@@ -16,7 +16,8 @@ export class VideoChatComponent implements OnInit {
   private peer: Peer | undefined;
   private localStream: MediaStream | undefined;
   private currentCall: any;
-  private roomId: string = '';
+  public roomId: string = '';
+  public roomIdDisplay: string = '';
   public isRemoteVideoVisible: boolean = false;
   public isRoomAdmin: boolean = false;
 
@@ -89,7 +90,7 @@ export class VideoChatComponent implements OnInit {
     if (remoteId == null || remoteId == ''){
       return uuidv4();
     }
-
+    this.roomIdDisplay = remoteId;
     if (await this.peerValidationService.isRoomExist(remoteId)) {
       return uuidv4();
     } else {

@@ -23,6 +23,7 @@
 
 .fullscreen .primaryVideo {
     position: fixed;
+    border: 0px;
     top: 0;
     left: 0;
     width: 100vw;

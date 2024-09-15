@@ -1,14 +1,14 @@
 <h2 id="myRoomId">{{this.roomIdDisplay}}</h2>
 <div>
     <button (click)="copyLinkToClipboard()" [hidden]="!isRoomAdmin">Скопировать ссылку на комнату</button>
+    <button (click)="toggleFullScreen()">Полноэкранный режим</button>
     <button (click)="closeCall()">Закончить звонок</button>
 </div>
 <div class="call-area">
     <div class="video-container">
-        <video id="remoteVideo" class="primaryVideo" [hidden]="!isRemoteVideoVisible" (click)="swapVideo('remote')"
-            autoplay playsinline></video>
+        <video id="remoteVideo" class="primaryVideo" [hidden]="!isRemoteVideoVisible" autoplay playsinline></video>
     </div>
     <div class="video-container">
-        <video id="localVideo" class="secondaryVideo" (click)="swapVideo('local')" autoplay playsinline></video>
+        <video id="localVideo" class="secondaryVideo" autoplay playsinline></video>
     </div>
 </div>

@@ -28,12 +28,18 @@ export class VideoChatComponent implements OnInit {
   ngOnInit() {
     this.setupMedia();
     this.setupPeer().then(() => {
-      if(!this.isRoomAdmin){
+      if (!this.isRoomAdmin) {
         setTimeout(() => {
           this.callPeer();
         }, 500);
       }
     });
+    document.addEventListener('fullscreenchange', this.onFullScreenChange);
+  }
+
+  ngOnDestroy() {
+    document.removeEventListener('fullscreenchange', this.onFullScreenChange);
+    document.removeEventListener('click', this.exitFullScreenOnClick);
   }
 
   async setupPeer() {
@@ -85,9 +91,9 @@ export class VideoChatComponent implements OnInit {
     console.log("link copied");
   }
 
-  async initializePeerId(){
+  async initializePeerId() {
     const remoteId = this.getRemoteId();
-    if (remoteId == null || remoteId == ''){
+    if (remoteId == null || remoteId == '') {
       return uuidv4();
     }
     this.roomIdDisplay = remoteId;
@@ -109,7 +115,7 @@ export class VideoChatComponent implements OnInit {
     if (this.currentCall) {
       this.currentCall.close();
     }
-    if(this.peer){
+    if (this.peer) {
       this.peer.destroy();
     }
     this.router.navigate(['']);
@@ -121,9 +127,9 @@ export class VideoChatComponent implements OnInit {
       return;
     if (this.peer == undefined || this.localStream == undefined)
       return;
-    
+
     const call = this.peer.call(remotePeerId, this.localStream);
-    
+
     const streamTimeout = setTimeout(() => {
       console.log('Room not found.');
       alert('Комната не найдена. Использован неправильный идентификатор!');
@@ -154,19 +160,46 @@ export class VideoChatComponent implements OnInit {
   swapVideo(type: string) {
     const localVideo = document.getElementById('localVideo') as HTMLVideoElement;
     const remoteVideo = document.getElementById('remoteVideo') as HTMLVideoElement;
-  
+
     if (type === 'local') {
       localVideo.classList.remove('secondaryVideo');
       localVideo.classList.add('primaryVideo');
-  
+
       remoteVideo.classList.remove('primaryVideo');
       remoteVideo.classList.add('secondaryVideo');
     } else if (type === 'remote') {
       remoteVideo.classList.remove('secondaryVideo');
       remoteVideo.classList.add('primaryVideo');
-  
+
       localVideo.classList.remove('primaryVideo');
       localVideo.classList.add('secondaryVideo');
     }
-  }  
+  }
+
+  toggleFullScreen() {
+    const videoContainer = document.querySelector('.call-area') as HTMLElement;
+    videoContainer.requestFullscreen().catch(err => {
+      console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+    });
+  }
+
+  onFullScreenChange = () => {
+    const videoContainer = document.querySelector('.call-area') as HTMLElement;
+    if (!document.fullscreenElement) {
+      videoContainer.classList.remove('fullscreen');
+      document.removeEventListener('click', this.exitFullScreenOnClick);
+    } else {
+      videoContainer.classList.add('fullscreen');
+      document.addEventListener('click', this.exitFullScreenOnClick);
+    }
+  }
+
+  exitFullScreenOnClick = (event: MouseEvent) => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+      const videoContainer = document.querySelector('.call-area') as HTMLElement;
+      videoContainer.classList.remove('fullscreen');
+      document.removeEventListener('click', this.exitFullScreenOnClick);
+    }
+  }
 }

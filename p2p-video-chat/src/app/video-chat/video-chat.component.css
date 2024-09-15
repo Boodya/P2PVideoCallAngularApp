@@ -27,13 +27,13 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    object-fit: cover;
+    object-fit: contain;
     z-index: 1000;
 }
 
 .fullscreen .secondaryVideo {
     width: 20%;
-    max-height: 15vh;
+    /*max-height: 25vh;*/
     position: absolute;
     bottom: 10px;
     right: 10px;

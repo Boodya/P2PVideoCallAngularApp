@@ -1,14 +1,12 @@
-<h2>Добро пожаловать в P2P Чат</h2>
-<div>
-    <div class="container">
-        <input type="text" id="roomId" placeholder="Чат для подключения">
-        <button (click)="joinChat()">Подключиться</button>
-    </div>
+<div class="border-container">
+    <h2>Добро пожаловать в P2P Чат</h2>
+    <input type="text" id="roomId" placeholder="Чат для подключения">
+    <button (click)="joinChat()">Подключиться</button>
+    <br /><br />
+    <label class="switch">
+        <input type="checkbox" (change)="toggleDarkMode($event)" [checked]="isDarkModeEnabled()">
+        <span class="slider"></span>
+    </label>
+    <p>Тёмный режим</p><br />
 </div>
-<br /><br />
-<label class="switch">
-    <input type="checkbox" (change)="toggleDarkMode($event)" [checked]="isDarkModeEnabled()">
-    <span class="slider"></span>
-</label>
-<p>Тёмный режим</p><br/>
 <video id="localVideo" class="secondaryVideo" autoplay playsinline></video>

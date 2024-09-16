@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { ThemeService } from '../services/theme.service';
-import { PeerValidationService } from '../services/peervalidation.service';
+import { PeerService } from '../services/peervalidation.service';
 
 @Component({
   selector: 'app-home',
@@ -14,7 +14,7 @@ export class HomeComponent {
   
   constructor(private router: Router,
     private themeService: ThemeService,
-    private pvService: PeerValidationService) { }
+    private pvService: PeerService) { }
 
   ngOnInit() {
     this.setupMedia();

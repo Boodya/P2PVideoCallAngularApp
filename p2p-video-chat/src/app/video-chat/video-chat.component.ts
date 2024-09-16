@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Peer } from 'peerjs';
 import { Router } from '@angular/router';
 import { ThemeService } from '../services/theme.service';
-import { PeerValidationService } from '../services/peervalidation.service';
+import { PeerService } from '../services/peervalidation.service';
 import { v4 as uuidv4 } from 'uuid';
 
 @Component({
@@ -23,18 +23,25 @@ export class VideoChatComponent implements OnInit {
 
   constructor(private router: Router,
     private themeService: ThemeService,
-    private peerValidationService: PeerValidationService) { }
+    private peerService: PeerService) { }
 
   ngOnInit() {
-    this.setupMedia();
-    this.setupPeer().then(() => {
-      if (!this.isRoomAdmin) {
-        setTimeout(() => {
-          this.callPeer();
-        }, 500);
+    document.addEventListener('fullscreenchange', this.onFullScreenChange);
+    this.setupMedia().then((media) => {
+      if (media == "error") {
+        this.router.navigate(['/']);
+      } else {
+        this.setupPeer().then(() => {
+          if (!this.isRoomAdmin) {
+            setTimeout(() => {
+              this.callPeer();
+            }, 1000);
+          } else {
+            this.peerService.AddPeer(this.roomIdDisplay);
+          }
+        });
       }
     });
-    document.addEventListener('fullscreenchange', this.onFullScreenChange);
   }
 
   ngOnDestroy() {
@@ -67,21 +74,25 @@ export class VideoChatComponent implements OnInit {
     });
   }
 
-  setupMedia() {
-    this.localStream = new MediaStream();
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-      .then((stream: MediaStream) => {
-        this.localStream = stream;
-        //const audioTracks = this.localStream.getAudioTracks();
-        //audioTracks.forEach(track => track.enabled = false);
-        const localVideo = document.getElementById('localVideo') as HTMLVideoElement;
-        localVideo.srcObject = this.localStream;
-        localVideo.volume = 0;
-        localVideo.muted = true;
-      })
-      .catch((error: any) => {
-        console.error('Error accessing media devices.', error);
-      });
+  setupMedia(): Promise<string> {
+    return new Promise((resolve) => {
+      this.localStream = new MediaStream();
+      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then((stream: MediaStream) => {
+          this.localStream = stream;
+          //const audioTracks = this.localStream.getAudioTracks();
+          //audioTracks.forEach(track => track.enabled = false);
+          const localVideo = document.getElementById('localVideo') as HTMLVideoElement;
+          localVideo.srcObject = this.localStream;
+          localVideo.volume = 0;
+          localVideo.muted = true;
+          resolve("media device configured");
+        })
+        .catch((error: any) => {
+          console.error('Error accessing media devices.', error);
+          resolve("error");
+        });
+    });
   }
 
   copyLinkToClipboard() {
@@ -97,7 +108,7 @@ export class VideoChatComponent implements OnInit {
       return uuidv4();
     }
     this.roomIdDisplay = remoteId;
-    if (await this.peerValidationService.isRoomExist(remoteId)) {
+    if (await this.peerService.isRoomExist(remoteId)) {
       return uuidv4();
     } else {
       this.isRoomAdmin = true;
@@ -145,8 +156,7 @@ export class VideoChatComponent implements OnInit {
     });
 
     call.on('close', () => {
-      console.log("call closed");
-      this.isRemoteVideoVisible = false;
+      this.router.navigate(['/']);
     });
 
     call.on('error', (err: any) => {

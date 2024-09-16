@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { ThemeService } from '../services/theme.service';
-import { PeerService } from '../services/peervalidation.service';
+import { PeerService } from '../services/peer.service';
 
 @Component({
   selector: 'app-home',

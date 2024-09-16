@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Peer } from 'peerjs';
 import { Router } from '@angular/router';
 import { ThemeService } from '../services/theme.service';
-import { PeerService } from '../services/peervalidation.service';
+import { PeerService } from '../services/peer.service';
 import { v4 as uuidv4 } from 'uuid';
 
 @Component({
@@ -37,11 +37,15 @@ export class VideoChatComponent implements OnInit {
               this.callPeer();
             }, 1000);
           } else {
-            this.peerService.AddPeer(this.roomIdDisplay);
+            this.peerService.addData(this.roomIdDisplay);
           }
         });
       }
     });
+    setTimeout(() => {
+      const data = this.peerService.getDataList();
+      console.log(data);
+    }, 1000);
   }
 
   ngOnDestroy() {
@@ -165,25 +169,6 @@ export class VideoChatComponent implements OnInit {
     });
 
     this.currentCall = call;
-  }
-
-  swapVideo(type: string) {
-    const localVideo = document.getElementById('localVideo') as HTMLVideoElement;
-    const remoteVideo = document.getElementById('remoteVideo') as HTMLVideoElement;
-
-    if (type === 'local') {
-      localVideo.classList.remove('secondaryVideo');
-      localVideo.classList.add('primaryVideo');
-
-      remoteVideo.classList.remove('primaryVideo');
-      remoteVideo.classList.add('secondaryVideo');
-    } else if (type === 'remote') {
-      remoteVideo.classList.remove('secondaryVideo');
-      remoteVideo.classList.add('primaryVideo');
-
-      localVideo.classList.remove('primaryVideo');
-      localVideo.classList.add('secondaryVideo');
-    }
   }
 
   toggleFullScreen() {

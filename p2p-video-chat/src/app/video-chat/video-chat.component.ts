@@ -16,6 +16,7 @@ export class VideoChatComponent implements OnInit {
   private peer: Peer | undefined;
   private localStream: MediaStream | undefined;
   private currentCall: any;
+  private roomIdAnchor: string = '8519c17e-8ee2-42e0-a6c2-4b3657a69624';
   public roomId: string = '';
   public roomIdDisplay: string = '';
   public isRemoteVideoVisible: boolean = false;
@@ -58,7 +59,7 @@ export class VideoChatComponent implements OnInit {
     this.peer = new Peer(peerId);
     this.peer.on('open', (id: string) => {
       console.log("Peer started with id " + id);
-      this.roomId = id;
+      this.roomId = this.decodeRemoteId(id);
     });
 
     this.peer.on('call', (call: any) => {
@@ -103,7 +104,6 @@ export class VideoChatComponent implements OnInit {
     const fP = window.location.origin + window.location.pathname;
     const url = `${fP}?roomId=${this.roomId}`;
     navigator.clipboard.writeText(url);
-    console.log("link copied");
   }
 
   async initializePeerId() {
@@ -112,13 +112,22 @@ export class VideoChatComponent implements OnInit {
       return uuidv4();
     }
     this.roomIdDisplay = remoteId;
-    if (await this.peerService.isRoomExist(remoteId)) {
+    const encodedRoomId = this.encodeRemoteId(remoteId);
+    if (await this.peerService.isRoomExist(encodedRoomId)) {
       return uuidv4();
     } else {
       this.isRoomAdmin = true;
       console.log("Starting room " + remoteId);
-      return remoteId;
+      return encodedRoomId;
     }
+  }
+
+  encodeRemoteId(remoteId: string){
+    return `${this.roomIdAnchor}-${remoteId}`;
+  }
+
+  decodeRemoteId(remoteId: string){
+    return remoteId.replaceAll(`${this.roomIdAnchor}-`,'');
   }
 
   getRemoteId() {
@@ -142,8 +151,8 @@ export class VideoChatComponent implements OnInit {
       return;
     if (this.peer == undefined || this.localStream == undefined)
       return;
-
-    const call = this.peer.call(remotePeerId, this.localStream);
+    
+    const call = this.peer.call(this.encodeRemoteId(remotePeerId), this.localStream);
 
     const streamTimeout = setTimeout(() => {
       console.log('Room not found.');

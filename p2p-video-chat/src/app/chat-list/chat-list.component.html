@@ -1,0 +1,17 @@
+<div class="border-container">
+    <button (click)="goHome()">В главное меню</button>
+</div>
+<div class="border-container">
+    <div *ngIf="activeRooms.length > 0">
+        <h3>Активные чаты</h3>
+        <div *ngFor="let room of activeRooms">
+            <button (click)="onRoomConnectButtonClick(room)">
+                {{ room }}
+            </button>
+        </div>
+    </div>
+    <div *ngIf="activeRooms.length == 0 && !isValidating">
+        <h3>Нет активных чатов</h3>
+    </div>
+    <div *ngIf="isValidating">Проверка активных чатов...</div>
+</div>

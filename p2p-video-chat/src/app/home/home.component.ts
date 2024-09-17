@@ -2,30 +2,40 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { ThemeService } from '../services/theme.service';
 import { PeerService } from '../services/peer.service';
+import { FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-home',
   standalone: true,
+  imports: [ReactiveFormsModule],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent {
   private localStream: MediaStream | undefined;
-  
-  constructor(private router: Router,
+  peerIdControl = new FormControl('', [
+    Validators.required,
+    Validators.minLength(2),
+    Validators.maxLength(30),
+    Validators.pattern(/^[a-zA-Z0-9]{2,30}$/)
+  ]);
+
+  constructor(public router: Router,
     private themeService: ThemeService,
-    private pvService: PeerService) { }
+    private peerService: PeerService) { }
 
   ngOnInit() {
     this.setupMedia();
   }
 
   joinChat() {
-    const roomId = document.getElementById("roomId") as HTMLInputElement;
-    if (roomId.value) {
-      this.router.navigate(['/chat'], { queryParams: { roomId: roomId.value } });
+    if(this.peerIdControl.valid){
+      const peerIdEl = document.getElementById("roomId") as HTMLInputElement;
+      peerIdEl.classList.remove('invalid');
+      this.router.navigate(['/chat'], { queryParams: { roomId: this.peerIdControl.value } });
     } else {
-      roomId.classList.add('invalid');
+      const peerIdEl = document.getElementById("roomId") as HTMLInputElement;
+      peerIdEl.classList.add('invalid');
     }
   }
 

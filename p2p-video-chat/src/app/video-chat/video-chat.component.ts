@@ -43,10 +43,6 @@ export class VideoChatComponent implements OnInit {
         });
       }
     });
-    setTimeout(() => {
-      const data = this.peerService.getDataList();
-      console.log(data);
-    }, 1000);
   }
 
   ngOnDestroy() {
@@ -122,12 +118,12 @@ export class VideoChatComponent implements OnInit {
     }
   }
 
-  encodeRemoteId(remoteId: string){
+  encodeRemoteId(remoteId: string) {
     return `${this.roomIdAnchor}-${remoteId}`;
   }
 
-  decodeRemoteId(remoteId: string){
-    return remoteId.replaceAll(`${this.roomIdAnchor}-`,'');
+  decodeRemoteId(remoteId: string) {
+    return remoteId.replaceAll(`${this.roomIdAnchor}-`, '');
   }
 
   getRemoteId() {
@@ -151,7 +147,7 @@ export class VideoChatComponent implements OnInit {
       return;
     if (this.peer == undefined || this.localStream == undefined)
       return;
-    
+
     const call = this.peer.call(this.encodeRemoteId(remotePeerId), this.localStream);
 
     const streamTimeout = setTimeout(() => {

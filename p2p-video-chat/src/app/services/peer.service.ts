@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Peer, DataConnection } from 'peerjs';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -8,11 +9,18 @@ export class PeerService {
     private peer!: Peer;
     private connections: Map<string, DataConnection> = new Map();
     private dataList: string[] = [];
-    private knownPeers: Set<string> = new Set();
     private readonly leaderId = 'ffb867ad-1848-46f6-b579-ea96ad746cbb';
     private isLeader = false;
     private lastBroadcastTime = 0;
     private broadcastDelay = 1000;
+
+    private dataListSubject = new BehaviorSubject<string[]>([]);
+    public dataList$ = this.dataListSubject.asObservable();
+
+    private readyPromiseResolve!: () => void;
+    public ready: Promise<void> = new Promise<void>((resolve) => {
+        this.readyPromiseResolve = resolve;
+    });
 
     constructor() {
         this.initializePeer();
@@ -24,6 +32,7 @@ export class PeerService {
         this.peer.on('open', (id: string) => {
             this.isLeader = true;
             this.startLeaderTasks();
+            this.readyPromiseResolve();
         });
 
         this.peer.on('error', (err) => {
@@ -59,6 +68,9 @@ export class PeerService {
 
         conn.on('open', () => {
             this.setupConnectionHandlers(conn);
+
+            // Сообщаем, что готовы
+            this.readyPromiseResolve();
         });
 
         conn.on('error', (err) => {
@@ -74,6 +86,7 @@ export class PeerService {
         this.peer.on('open', (id: string) => {
             this.isLeader = true;
             this.startLeaderTasks();
+            this.readyPromiseResolve();
         });
 
         this.peer.on('error', (err) => {
@@ -124,6 +137,8 @@ export class PeerService {
     private mergeDataList(receivedDataList: string[]) {
         const dataSet = new Set([...this.dataList, ...receivedDataList]);
         this.dataList = Array.from(dataSet);
+        this.dataListSubject.next(this.dataList);
+
         this.broadcastData();
     }
 
@@ -138,7 +153,7 @@ export class PeerService {
             }, this.broadcastDelay - (currentTime - this.lastBroadcastTime));
         }
     }
-    
+
     private sendDataToPeers() {
         this.connections.forEach((conn) => {
             if (conn.open) {
@@ -153,6 +168,8 @@ export class PeerService {
     public addData(item: string) {
         if (!this.dataList.includes(item)) {
             this.dataList.push(item);
+            this.dataListSubject.next(this.dataList);
+
             this.connections.forEach((conn) => {
                 if (conn.open) {
                     conn.send({

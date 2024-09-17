@@ -1,7 +1,8 @@
 <div class="border-container">
     <h2>Добро пожаловать в P2P Чат</h2>
-    <input type="text" id="roomId" placeholder="Чат для подключения">
+    <input type="text" id="roomId" [formControl]="peerIdControl" placeholder="Чат для подключения">
     <button (click)="joinChat()">Подключиться</button>
+    <button (click)="router.navigate(['/chatList'])">Активные чаты</button>
     <br /><br />
     <label class="switch">
         <input type="checkbox" (change)="toggleDarkMode($event)" [checked]="isDarkModeEnabled()">

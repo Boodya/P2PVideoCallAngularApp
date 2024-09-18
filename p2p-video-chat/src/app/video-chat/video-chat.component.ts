@@ -28,6 +28,8 @@ export class VideoChatComponent implements OnInit {
 
   ngOnInit() {
     document.addEventListener('fullscreenchange', this.onFullScreenChange);
+    document.addEventListener('webkitfullscreenchange', this.onFullScreenChange); // Safari
+    document.addEventListener('msfullscreenchange', this.onFullScreenChange); //IE11
     this.setupMedia().then((media) => {
       if (media == "error") {
         this.router.navigate(['/']);
@@ -178,6 +180,16 @@ export class VideoChatComponent implements OnInit {
 
   toggleFullScreen() {
     const videoContainer = document.querySelector('.call-area') as HTMLElement;
+    if (videoContainer.requestFullscreen) {
+      videoContainer.requestFullscreen();
+    } else if ((videoContainer as any).webkitRequestFullscreen) {
+      (videoContainer as any).webkitRequestFullscreen();
+    } else if ((videoContainer as any).msRequestFullscreen) {
+      (videoContainer as any).msRequestFullscreen();
+    } else {
+      console.error('Fullscreen API is not supported.');
+    }
+
     videoContainer.requestFullscreen().catch(err => {
       console.error(`Error attempting to enable full-screen mode: ${err.message}`);
     });
